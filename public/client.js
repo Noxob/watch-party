@@ -68,9 +68,10 @@ function sendMessage() {
   msgInput.value = '';
 }
 
-socket.on('chatMessage', ({ sender, message }) => {
+socket.on('chatMessage', ({ sender, message, timestamp }) => {
   const li = document.createElement('li');
-  li.textContent = `${sender}: ${message}`;
+  const time = new Date(timestamp).toLocaleTimeString();
+  li.textContent = `[${time}] ${sender}: ${message}`;
   messages.appendChild(li);
 });
 
@@ -87,13 +88,13 @@ video.addEventListener('timeupdate', () => {
   }
 });
 
-socket.on('videoTimeUpdate', (time) => {
+socket.on('videoTimeUpdate', ({ time }) => {
   if (Math.abs(video.currentTime - time) > 0.5) {
     video.currentTime = time;
   }
 });
 
-socket.on('videoStateChange', (playing) => {
+socket.on('videoStateChange', ({ playing }) => {
   if (playing && video.paused) video.play();
   if (!playing && !video.paused) video.pause();
 });
