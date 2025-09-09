@@ -48,7 +48,7 @@ io.on('connection', (socket) => {
       socket.join(key);
       socket.name = name;
       socket.room = key;
-      socket.emit('videoState', room.video);
+      socket.emit('videoState', { ...room.video, timestamp: new Date().toISOString() });
       cb && cb({ ok: true });
     } else {
       cb && cb({ ok: false, error: 'Room not found' });
@@ -56,20 +56,23 @@ io.on('connection', (socket) => {
   });
 
   socket.on('chatMessage', ({ room, message }) => {
-    io.to(room).emit('chatMessage', { sender: socket.name, message });
+    const timestamp = new Date().toISOString();
+    io.to(room).emit('chatMessage', { sender: socket.name, message, timestamp });
   });
 
   socket.on('videoTimeUpdate', ({ room, time }) => {
     if (rooms[room]) {
       rooms[room].video.time = time;
-      socket.to(room).emit('videoTimeUpdate', time);
+      const timestamp = new Date().toISOString();
+      socket.to(room).emit('videoTimeUpdate', { time, timestamp });
     }
   });
 
   socket.on('videoStateChange', ({ room, playing }) => {
     if (rooms[room]) {
       rooms[room].video.playing = playing;
-      socket.to(room).emit('videoStateChange', playing);
+      const timestamp = new Date().toISOString();
+      socket.to(room).emit('videoStateChange', { playing, timestamp });
     }
   });
 
