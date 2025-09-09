@@ -87,7 +87,7 @@ video.addEventListener('timeupdate', () => {
   }
 });
 
-socket.on('videoTimeUpdate', (time) => {
+socket.on('videoTimeUpdate', ({ time, sentAt }) => {
   if (Math.abs(video.currentTime - time) > 0.5) {
     video.currentTime = time;
   }
