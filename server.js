@@ -62,7 +62,7 @@ io.on('connection', (socket) => {
   socket.on('videoTimeUpdate', ({ room, time }) => {
     if (rooms[room]) {
       rooms[room].video.time = time;
-      socket.to(room).emit('videoTimeUpdate', time);
+      socket.to(room).emit('videoTimeUpdate', { time, sentAt: Date.now() });
     }
   });
 
