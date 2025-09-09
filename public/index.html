@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Watch Party</title>
+  <style>
+    body { font-family: sans-serif; margin: 20px; }
+    #party { display: none; margin-top: 20px; }
+    #messages { list-style: none; padding: 0; max-height: 200px; overflow-y: auto; }
+    #messages li { margin: 5px 0; }
+  </style>
+</head>
+<body>
+  <h1>Watch Party</h1>
+    <div id="setup">
+      <input id="nameInput" placeholder="your name" />
+      <button id="createBtn">Create Room</button>
+      <input id="roomInput" placeholder="room key" />
+      <button id="joinBtn">Join Room</button>
+      <p>Room: <span id="roomDisplay">-</span></p>
+    </div>
+  <div id="party">
+    <video id="video" width="640" controls>
+      <source src="https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/720/Big_Buck_Bunny_720_10s_1MB.mp4" type="video/mp4" />
+    </video>
+    <div id="chat">
+      <ul id="messages"></ul>
+      <input id="msgInput" autocomplete="off" />
+      <button id="sendBtn">Send</button>
+    </div>
+  </div>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="client.js"></script>
+</body>
+</html>
