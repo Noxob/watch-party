@@ -3,6 +3,7 @@ const socket = io();
 const createBtn = document.getElementById('createBtn');
 const joinBtn = document.getElementById('joinBtn');
 const roomInput = document.getElementById('roomInput');
+const nameInput = document.getElementById('nameInput');
 const roomDisplay = document.getElementById('roomDisplay');
 const setupDiv = document.getElementById('setup');
 const partyDiv = document.getElementById('party');
@@ -12,29 +13,42 @@ const msgInput = document.getElementById('msgInput');
 const sendBtn = document.getElementById('sendBtn');
 
 let currentRoom = null;
+let currentName = '';
 let lastSent = 0;
 
 createBtn.onclick = () => {
-  socket.emit('createRoom');
+  const name = nameInput.value.trim();
+  if (!name) {
+    alert('Enter a name');
+    return;
+  }
+  socket.emit('createRoom', name, (res) => {
+    if (res.ok) {
+      currentRoom = res.key;
+      currentName = name;
+      roomInput.value = res.key;
+      startParty();
+    }
+  });
 };
 
 joinBtn.onclick = () => {
   const key = roomInput.value.trim();
-  socket.emit('joinRoom', key, (res) => {
+  const name = nameInput.value.trim();
+  if (!key || !name) {
+    alert('Enter room key and name');
+    return;
+  }
+  socket.emit('joinRoom', { key, name }, (res) => {
     if (res.ok) {
       currentRoom = key;
+      currentName = name;
       startParty();
     } else {
       alert(res.error);
     }
   });
 };
-
-socket.on('roomCreated', (key) => {
-  currentRoom = key;
-  roomInput.value = key;
-  startParty();
-});
 
 function startParty() {
   roomDisplay.textContent = currentRoom;

@@ -7,6 +7,7 @@ A simple Node.js watch party application using Socket.IO. Create rooms, chat, an
 - Room-based chat
 - Video time synchronization
 - Play and pause events shared to all participants
+- Choose a unique name when joining a room
 
 ## Development
 ```bash

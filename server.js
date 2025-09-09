@@ -22,20 +22,33 @@ function generateRoomKey() {
 }
 
 io.on('connection', (socket) => {
-  socket.on('createRoom', () => {
+  socket.on('createRoom', (name, cb) => {
     let key;
     do {
       key = generateRoomKey();
     } while (rooms[key]);
-    rooms[key] = { video: { time: 0, playing: false } };
+    rooms[key] = {
+      video: { time: 0, playing: false },
+      users: { [name]: socket.id },
+    };
     socket.join(key);
-    socket.emit('roomCreated', key);
+    socket.name = name;
+    socket.room = key;
+    cb && cb({ ok: true, key });
   });
 
-  socket.on('joinRoom', (key, cb) => {
-    if (rooms[key]) {
+  socket.on('joinRoom', ({ key, name }, cb) => {
+    const room = rooms[key];
+    if (room) {
+      if (room.users[name]) {
+        cb && cb({ ok: false, error: 'Name already taken' });
+        return;
+      }
+      room.users[name] = socket.id;
       socket.join(key);
-      socket.emit('videoState', rooms[key].video);
+      socket.name = name;
+      socket.room = key;
+      socket.emit('videoState', room.video);
       cb && cb({ ok: true });
     } else {
       cb && cb({ ok: false, error: 'Room not found' });
@@ -43,7 +56,7 @@ io.on('connection', (socket) => {
   });
 
   socket.on('chatMessage', ({ room, message }) => {
-    io.to(room).emit('chatMessage', { sender: socket.id, message });
+    io.to(room).emit('chatMessage', { sender: socket.name, message });
   });
 
   socket.on('videoTimeUpdate', ({ room, time }) => {
@@ -57,6 +70,16 @@ io.on('connection', (socket) => {
     if (rooms[room]) {
       rooms[room].video.playing = playing;
       socket.to(room).emit('videoStateChange', playing);
+    }
+  });
+
+  socket.on('disconnect', () => {
+    const { room, name } = socket;
+    if (room && rooms[room]) {
+      delete rooms[room].users[name];
+      if (Object.keys(rooms[room].users).length === 0) {
+        delete rooms[room];
+      }
     }
   });
 });
